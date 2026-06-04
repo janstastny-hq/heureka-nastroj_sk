@@ -15,20 +15,18 @@ def nacti_nastroj():
 
 nastroj = nacti_nastroj()
 
-# 🚀 OPRAVA: Přepínač změněn na SK a EN
 jazyk = st.radio(
     "🌐 Language / Jazyk:",
     options=["SK", "EN"],
     horizontal=True
 )
 
-# 🚀 ABSOLUTNÍ OPRAVA: Všechny texty jsou teď pouze slovensky nebo anglicky
 txt = {
     "title": "🤖 Heureka All-In-One SK",
     "subtitle": "Inteligentné vyhľadávanie kategórií a systémových pravidiel" if jazyk == "SK" else "Smart search for categories and system rules",
-    "desc": "Zadajte názov produktu z e-shopu a algoritmus sa postará o zvyšok." if jazyk == "SK" else "Enter the product name from the e-shop and the algorithm will do the rest.",
+    "desc": "Zadajte názov produktu z e-shopu a algoritmus se postará o zvyšok." if jazyk == "SK" else "Enter the product name from the e-shop and the algorithm will do the rest.",
     "input_label": "📝 Názov produktu z eshopu:" if jazyk == "SK" else "📝 Product name from e-shop:",
-    "input_placeholder": "Zadajte názov produktu..." if jazyk == "SK" else "Enter product name...",
+    "input_placeholder": "Zadejte názov produktu..." if jazyk == "SK" else "Enter product name...",
     "type_classic": "🔍 Typ vyhľadávania: Klasická zhoda" if jazyk == "SK" else "🔍 Search type: Classic match",
     "select_label": "👉 Vyberte alebo potvrďte finálnu kategóriu:" if jazyk == "SK" else "👉 Select or confirm the final category:",
     "rules_title": "### 📋 Systémové pravidlá pre:" if jazyk == "SK" else "### 📋 System rules for:",
@@ -38,9 +36,20 @@ txt = {
     "no_param": "Pri tejto kategórii nie je vyžadovaný žiadny povinný parameter." if jazyk == "SK" else "No required parameter is specified for this category.",
     "err_relevant": "❌ Nepodarilo sa nájsť žiadnu dostatočne relevantnú kategóriu. Skúste všeobecnejší názov." if jazyk == "SK" else "❌ No sufficiently relevant category found. Try a more general name.",
     "err_empty": "❌ Nepodarilo sa nájsť žiadnu zodpovedajúcu kategóriu." if jazyk == "SK" else "❌ No matching category found.",
-    "all_params_label": "💡 **Odporúčané a voliteľné parametre (Heureka V2):**" if jazyk == "SK" else "💡 **Recommended and optional parameters (Heureka V2):**",
+    "all_params_label": "💡 **Odporúčané a volitelné parametre (Heureka V2):**" if jazyk == "SK" else "💡 **Recommended and optional parameters (Heureka V2):**",
     "no_all_param": "Pre túto kategóriu nie sú v Heureka V2 definované žiadne ďalšie odporúčané parametre." if jazyk == "SK" else "No additional recommended parameters are defined for this category in Heureka V2.",
-    "table_header": "Názov parametra" if jazyk == "SK" else "Parameter name"
+    "table_header": "Názov parametra" if jazyk == "SK" else "Parameter name",
+    # Texty pre modul hodnotenia
+    "rating_title": "### ⭐ Ohodnoťte náš nástroj" if jazyk == "SK" else "### ⭐ Rate our tool",
+    "rating_comment_label": "Máte pre nás odkaz alebo nápad na zlepšenie?" if jazyk == "SK" else "Do you have a message or an idea for improvement?",
+    "rating_comment_placeholder": "Napíšte nám..." if jazyk == "SK" else "Write to us...",
+    "rating_button": "Odoslať hodnotenie" if jazyk == "SK" else "Submit rating",
+    "rating_success": "🎉 Ďakujeme! Vaše hodnotenie bolo úspešne uložené." if jazyk == "SK" else "🎉 Thank you! Your rating has been successfully saved.",
+    "rating_warning": "Prosím, vyberte najskôr počet hviezdičiek." if jazyk == "SK" else "Please select a star rating first.",
+    # Správcovské texty (Neutrálne bez mena)
+    "admin_panel_title": "📊 Správa nástroja" if jazyk == "SK" else "📊 Tool Administration",
+    "admin_password_label": "Zadajte správcovské heslo:" if jazyk == "SK" else "Enter admin password:",
+    "admin_wrong_password": "❌ Nesprávne heslo!" if jazyk == "SK" else "❌ Incorrect password!"
 }
 
 st.title(txt["title"])
@@ -114,15 +123,20 @@ if produkt_input.strip():
                 else:
                     st.success(txt["no_param"])
                 
-                # --- PREHĽADNÝ ROLOVACÍ BOX PRE V2 ---
+                # --- NOVÝ IDENTICKÝ CZ VIZUÁL BEZ NUTNOSTI NUMPY ---
                 st.write("")  
                 st.info(txt["all_params_label"])
                 
                 if vsechny_parametry_text and vsechny_parametry_text.strip():
                     list_parametru = [p.strip() for p in vsechny_parametry_text.split(',') if p.strip()]
                     
+                    # 🚀 Tady je ta změna: Převedeme data na seznam jednotlivých řádků.
+                    # To Streamlitu stačí, aby vykreslil přesně tu tabulku jako v CZ,
+                    # ale vnitřní kód kompletně přeskočí kontrolu formátů vyžadující numpy!
+                    data_pro_tabulku = [{txt["table_header"]: param} for param in list_parametru]
+                    
                     st.dataframe(
-                        {txt["table_header"]: list_parametru},
+                        data_pro_tabulku,
                         use_container_width=True,
                         height=380,
                         hide_index=True
@@ -134,3 +148,67 @@ if produkt_input.strip():
             st.error(txt["err_relevant"])
     else:
         st.error(txt["err_empty"])
+
+# ===============================================================================
+# ⭐ MODUL PRE HODNOTENIE NÁSTROJA (Klikacie hviezdičky vo vnútri formulára)
+# ===============================================================================
+st.divider()
+st.write(txt["rating_title"])
+
+# Definujeme názov súboru pre ukladanie hodnotení vo rovnakej zložke
+SOUBOR_HODNOCENI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "historie_hodnoceni.txt")
+
+# Zabalenie hodnotenia do formulára (bezpečné prenášanie stavu prvkov)
+with st.form("formular_hodnoceni_sk", clear_on_submit=True):
+    
+    hodnoceni = st.feedback("stars", key="kliknute_hvezdicky_sk")
+    
+    komentar = st.text_area(
+        txt["rating_comment_label"], 
+        placeholder=txt["rating_comment_placeholder"],
+        key="kliknuty_komentar_sk"
+    )
+    
+    odeslano = st.form_submit_button(txt["rating_button"])
+    
+    if odeslano:
+        if hodnoceni is not None:
+            pocet_hvezdicek = hodnoceni + 1
+            hvezdy_text = "⭐" * pocet_hvezdicek + f" ({pocet_hvezdicek}/5)"
+            
+            cisty_komentar = komentar.strip() if komentar.strip() else "Bez textového komentára."
+            radek_k_zapisu = f"Hodnotenie: {hvezdy_text} | Jazyk: {jazyk} | Vzkaz: {cisty_komentar}\n"
+            
+            try:
+                with open(SOUBOR_HODNOCENI, "a", encoding="utf-8") as f:
+                    f.write(radek_k_zapisu)
+                st.success(txt["rating_success"])
+            except Exception as e:
+                st.error(f"Chyba pri ukladaní: {e}")
+        else:
+            st.warning(txt["rating_warning"])
+
+# 📊 ANONYMNÝ SKRYTÝ ROZBALOVACÍ PANEL ZABEZPEČENÝ HESLOM
+st.write("")
+with st.expander(txt["admin_panel_title"]):
+    heslo = st.text_input(txt["admin_password_label"], type="password", key="sprava_heslo_sk")
+    
+    if heslo == "Bandyta12":
+        if os.path.exists(SOUBOR_HODNOCENI):
+            try:
+                with open(SOUBOR_HODNOCENI, "r", encoding="utf-8") as f:
+                    zaznamy = f.readlines()
+                
+                if zaznamy:
+                    st.write(f"### 📋 Získané hodnotenia (Celkom: {len(zaznamy)}):")
+                    for zr in reversed(zaznamy):
+                        if zr.strip():
+                            st.code(zr.strip(), language="text")
+                else:
+                    st.info("História hodnotení je zatiaľ prázdna." if jazyk == "SK" else "Rating history is empty.")
+            except Exception as e:
+                st.error(f"Chyba pri čítaní: {e}")
+        else:
+            st.info("Zatiaľ nikto neodoslal žiadne hodnotenie." if jazyk == "SK" else "No ratings submitted yet.")
+    elif heslo != "":
+        st.error(txt["admin_wrong_password"])

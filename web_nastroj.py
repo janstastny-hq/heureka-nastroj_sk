@@ -25,9 +25,8 @@ txt = {
     "title": "🤖 Heureka All-In-One SK",
     "subtitle": "Inteligentné vyhľadávanie kategórií a systémových pravidiel" if jazyk == "SK" else "Smart search for categories and system rules",
     "desc": "Zadajte názov produktu z e-shopu a algoritmus se postará o zvyšok." if jazyk == "SK" else "Enter the product name from the e-shop and the algorithm will do the rest.",
-    # 🌟 PRIDANÉ PRÍKLADY DO ZÁVORKY PRE SK
-    "input_label": "📝 Obecný názov produktu (napr. matrace, mobil, pneumatika):" if jazyk == "SK" else "📝 General product name (e.g. mattress, mobile, tire):",
-    "input_placeholder": "Zadejte názov produktu..." if jazyk == "SK" else "Enter product name...",
+    "input_label": "### 📝 Obecný názov produktu (napr. matrace, mobil, pneumatika):" if jazyk == "SK" else "### 📝 General product name (e.g. mattress, mobile, tire):",
+    "input_placeholder": "🔍 Sem napíšte názov produktu a stlačte Enter..." if jazyk == "SK" else "🔍 Type product name here and press Enter...",
     "type_classic": "🔍 Typ vyhľadávania: Klasická zhoda" if jazyk == "SK" else "🔍 Search type: Classic match",
     "select_label": "👉 Vyberte alebo potvrďte finálnu kategóriu:" if jazyk == "SK" else "👉 Select or confirm the final category:",
     "rules_title": "### 📋 Systémové pravidlá pre:" if jazyk == "SK" else "### 📋 System rules for:",
@@ -40,6 +39,7 @@ txt = {
     "all_params_label": "💡 **Odporúčané a volitelné parametre (Heureka V2):**" if jazyk == "SK" else "💡 **Recommended and optional parameters (Heureka V2):**",
     "table_header": "Názov parametra" if jazyk == "SK" else "Parameter name",
     "no_all_param": "Pre túto kategóriu nie sú v Heureka V2 definované žiadne ďalšie odporúčané parametre." if jazyk == "SK" else "No additional recommended parameters are defined for this category in Heureka V2.",
+    "support_text": "💡 **Neviete si rady?** Ak potrebujete pomôcť s nastavením feedu alebo párovaním, napíšte nám na [podpora@heureka.sk](mailto:podpora@heureka.sk)." if jazyk == "SK" else "💡 **Need help?** If you need assistance with feed setup or category matching, contact us at [podpora@heureka.sk](mailto:podpora@heureka.sk).",
     # Texty pre modul hodnotenia
     "rating_title": "### ⭐ Ohodnoťte náš nástroj" if jazyk == "SK" else "### ⭐ Rate our tool",
     "rating_comment_label": "Máte pre nás odkaz alebo nápad na zlepšenie?" if jazyk == "SK" else "Do you have a message or an idea for improvement?",
@@ -50,7 +50,7 @@ txt = {
     # Správcovské texty
     "admin_panel_title": "📊 Správa nástroja" if jazyk == "SK" else "📊 Tool Administration",
     "admin_password_label": "Zadejte správcovské heslo:" if jazyk == "SK" else "Enter admin password:",
-    "admin_wrong_password": "❌ Nesprávne heslo!" if jazyk == "SK" else "❌ Incorrect password!"
+    "admin_wrong_password": "❌ Nesprávné heslo!" if jazyk == "SK" else "❌ Incorrect password!"
 }
 
 st.title(txt["title"])
@@ -59,7 +59,9 @@ st.write(txt["desc"])
 
 st.divider()
 
-produkt_input = st.text_input(txt["input_label"], placeholder=txt["input_placeholder"])
+st.markdown(txt["input_label"])
+# Opraveno DuplicateWidgetID použitím fixního klíče pro text_input
+produkt_input = st.text_input("vstupni_pole_produkt_sk", placeholder=txt["input_placeholder"], label_visibility="collapsed", key="vstupni_pole_produkt_sk")
 
 if produkt_input.strip():
     shody = nastroj.vyhledej_presnou_logikou(produkt_input.strip())
@@ -147,66 +149,69 @@ if produkt_input.strip():
     else:
         st.error(txt["err_empty"])
 
-# ===============================================================================
-# ⭐ MODUL PRE HODNOTENIE NÁSTROJA
-# ===============================================================================
-st.divider()
+    # ===============================================================================
+    # ⭐ MODUL PRE HODNOTENIE NÁSTROJA A PODPORU
+    # ===============================================================================
+    st.divider()
 
-col1, col2 = st.columns([3, 1])
+    col1, col2 = st.columns([3, 1])
 
-with col1:
-    st.write(txt["rating_title"])
-    SOUBOR_HODNOCENI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "historie_hodnoceni.txt")
+    with col1:
+        st.write(txt["rating_title"])
+        SOUBOR_HODNOCENI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "historie_hodnoceni.txt")
 
-    with st.form("formular_hodnoceni_sk", clear_on_submit=True):
-        hodnoceni = st.feedback("stars", key="kliknute_hvezdicky_sk")
-        
-        komentar = st.text_area(
-            txt["rating_comment_label"], 
-            placeholder=txt["rating_comment_placeholder"],
-            key="kliknuty_komentar_sk"
-        )
-        
-        odeslano = st.form_submit_button(txt["rating_button"])
-        
-        if odeslano:
-            if hodnoceni is not None:
-                pocet_hvezdicek = hodnoceni + 1
-                hvezdy_text = "⭐" * pocet_hvezdicek + f" ({pocet_hvezdicek}/5)"
-                
-                cisty_komentar = komentar.strip() if komentar.strip() else "Bez textového komentára."
-                radek_k_zapisu = f"Hodnotenie: {hvezdy_text} | Jazyk: {jazyk} | Vzkaz: {cisty_komentar}\n"
-                
-                try:
-                    with open(SOUBOR_HODNOCENI, "a", encoding="utf-8") as f:
-                        f.write(radek_k_zapisu)
-                    st.success(txt["rating_success"])
-                except Exception as e:
-                    st.error(f"Chyba pri ukladaní: {e}")
-            else:
-                st.warning(txt["rating_warning"])
-
-# 📊 ANONYMNÝ SKRYTÝ ROZBALOVACÍ PANEL ZABEZPEČENÝ HESLOM
-st.write("")
-with st.expander(txt["admin_panel_title"]):
-    heslo = st.text_input(txt["admin_password_label"], type="password", key="sprava_heslo_sk")
-    
-    if heslo == "Bandyta12":
-        if os.path.exists(SOUBOR_HODNOCENI):
-            try:
-                with open(SOUBOR_HODNOCENI, "r", encoding="utf-8") as f:
-                    zaznamy = f.readlines()
-                
-                if zaznamy:
-                    st.write(f"### 📋 Získané hodnotenia (Celkom: {len(zaznamy)}):")
-                    for zr in reversed(zaznamy):
-                        if zr.strip():
-                            st.code(zr.strip(), language="text")
+        with st.form("formular_hodnoceni_sk", clear_on_submit=True):
+            hodnoceni = st.feedback("stars", key="kliknute_hvezdicky_sk")
+            
+            komentar = st.text_area(
+                txt["rating_comment_label"], 
+                placeholder=txt["rating_comment_placeholder"],
+                key="kliknuty_komentar_sk"
+            )
+            
+            odeslano = st.form_submit_button(txt["rating_button"])
+            
+            if odeslano:
+                if hodnoceni is not None:
+                    pocet_hvezdicek = hodnoceni + 1
+                    hvezdy_text = "⭐" * pocet_hvezdicek + f" ({pocet_hvezdicek}/5)"
+                    
+                    cisty_komentar = komentar.strip() if komentar.strip() else "Bez textového komentára."
+                    radek_k_zapisu = f"Hodnotenie: {hvezdy_text} | Jazyk: {jazyk} | Vzkaz: {cisty_komentar}\n"
+                    
+                    try:
+                        with open(SOUBOR_HODNOCENI, "a", encoding="utf-8") as f:
+                            f.write(radek_k_zapisu)
+                        st.success(txt["rating_success"])
+                    except Exception as e:
+                        st.error(f"Chyba pri ukladaní: {e}")
                 else:
-                    st.info("História hodnotení je zatiaľ prázdna.")
-            except Exception as e:
-                st.error(f"Chyba pri čítaní: {e}")
-        else:
-            st.info("Zatiaľ nikto neodoslal žiadne hodnotenie.")
-    elif heslo != "":
-        st.error(txt["admin_wrong_password"])
+                    st.warning(txt["rating_warning"])
+
+    st.write("")
+    st.markdown(txt["support_text"])
+
+    # 📊 ANONYMNÝ SKRYTÝ ROZBALOVACÍ PANEL ZABEZPEČENÝ HESLOM (Opraveno typo v podmínce)
+    st.write("")
+    with st.expander(txt["admin_panel_title"]):
+        heslo = st.text_input(txt["admin_password_label"], type="password", key="sprava_heslo_sk")
+        
+        if heslo == "Bandyta12":
+            if os.path.exists(SOUBOR_HODNOCENI):
+                try:
+                    with open(SOUBOR_HODNOCENI, "r", encoding="utf-8") as f:
+                        zaznamy = f.readlines()
+                    
+                    if zaznamy:
+                        st.write(f"### 📋 Získané hodnotenia (Celkem: {len(zaznamy)}):")
+                        for zr in reversed(zaznamy):
+                            if zr.strip():
+                                st.code(zr.strip(), language="text")
+                    else:
+                        st.info("História hodnotení je zatiaľ prázdna.")
+                except Exception as e:
+                    st.error(f"Chyba pri čítaní: {e}")
+            else:
+                st.info("Zatiaľ nikto neodoslal žiadne hodnotenie.")
+        elif heslo != "":
+            st.error(txt["admin_wrong_password"])

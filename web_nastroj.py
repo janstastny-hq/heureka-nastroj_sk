@@ -25,8 +25,8 @@ txt = {
     "title": "🤖 Heureka All-In-One SK",
     "subtitle": "Inteligentné vyhľadávanie kategórií a systémových pravidiel" if jazyk == "SK" else "Smart search for categories and system rules",
     "desc": "Zadajte názov produktu z e-shopu a algoritmus se postará o zvyšok." if jazyk == "SK" else "Enter the product name from the e-shop and the algorithm will do the rest.",
-    # 🌟 OPRAVA: Text nad vyhledávacím políčkem úplně nahoře
-    "input_label": "📝 Obecný názov produktu:" if jazyk == "SK" else "📝 General product name:",
+    # 🌟 PRIDANÉ PRÍKLADY DO ZÁVORKY PRE SK
+    "input_label": "📝 Obecný názov produktu (napr. matrace, mobil, pneumatika):" if jazyk == "SK" else "📝 General product name (e.g. mattress, mobile, tire):",
     "input_placeholder": "Zadejte názov produktu..." if jazyk == "SK" else "Enter product name...",
     "type_classic": "🔍 Typ vyhľadávania: Klasická zhoda" if jazyk == "SK" else "🔍 Search type: Classic match",
     "select_label": "👉 Vyberte alebo potvrďte finálnu kategóriu:" if jazyk == "SK" else "👉 Select or confirm the final category:",
@@ -38,7 +38,6 @@ txt = {
     "err_relevant": "❌ Nepodarilo se nájsť žiadnu dostatečne relevantnú kategóriu. Skúste všeobecnejší názov." if jazyk == "SK" else "❌ No sufficiently relevant category found. Try a more general name.",
     "err_empty": "❌ Nepodarilo sa nájsť žiadnu zodpovedajúcu kategóriu." if jazyk == "SK" else "❌ No matching category found.",
     "all_params_label": "💡 **Odporúčané a volitelné parametre (Heureka V2):**" if jazyk == "SK" else "💡 **Recommended and optional parameters (Heureka V2):**",
-    # 🌟 OPRAVA: Záhlaví uvnitř tabulky parametrů
     "table_header": "Názov parametra" if jazyk == "SK" else "Parameter name",
     "no_all_param": "Pre túto kategóriu nie sú v Heureka V2 definované žiadne ďalšie odporúčané parametre." if jazyk == "SK" else "No additional recommended parameters are defined for this category in Heureka V2.",
     # Texty pre modul hodnotenia
@@ -50,7 +49,7 @@ txt = {
     "rating_warning": "Prosím, vyberte najskôr počet hviezdičiek." if jazyk == "SK" else "Please select a star rating first.",
     # Správcovské texty
     "admin_panel_title": "📊 Správa nástroja" if jazyk == "SK" else "📊 Tool Administration",
-    "admin_password_label": "Zadajte správcovské heslo:" if jazyk == "SK" else "Enter admin password:",
+    "admin_password_label": "Zadejte správcovské heslo:" if jazyk == "SK" else "Enter admin password:",
     "admin_wrong_password": "❌ Nesprávne heslo!" if jazyk == "SK" else "❌ Incorrect password!"
 }
 
